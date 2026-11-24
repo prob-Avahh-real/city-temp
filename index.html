@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0a1628" />
+  <title>城温</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a1628;
+      --ink: #eaf2ff;
+      --muted: #8fa3c1;
+      --accent: #3ec6ff;
+      --accent-2: #7dffc3;
+      --warn: #ffc857;
+      --err: #ff7b7b;
+      --line: rgba(234, 242, 255, 0.12);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --font: "Outfit", "PingFang SC", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background:
+        radial-gradient(80% 55% at 15% -10%, rgba(62, 198, 255, 0.22), transparent 55%),
+        radial-gradient(60% 45% at 95% 5%, rgba(125, 255, 195, 0.1), transparent 50%),
+        linear-gradient(180deg, #0d1c35 0%, var(--bg) 55%, #07101c 100%);
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding: calc(16px + var(--safe-top)) 16px calc(28px + var(--safe-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: clamp(1.8rem, 7vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .brand .tag {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      padding: 28px 22px 22px;
+      min-height: 220px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.06), transparent 40%),
+        linear-gradient(180deg, rgba(30, 70, 120, 0.45), rgba(10, 22, 40, 0.35));
+      transition: background 0.4s ease;
+    }
+    .hero[data-tone="freeze"] {
+      background:
+        linear-gradient(145deg, rgba(180, 220, 255, 0.18), transparent 45%),
+        linear-gradient(180deg, rgba(40, 90, 160, 0.55), rgba(10, 22, 40, 0.4));
+    }
+    .hero[data-tone="cold"] {
+      background:
+        linear-gradient(145deg, rgba(100, 190, 255, 0.2), transparent 45%),
+        linear-gradient(180deg, rgba(35, 85, 140, 0.5), rgba(10, 22, 40, 0.4));
+    }
+    .hero[data-tone="mild"] {
+      background:
+        linear-gradient(145deg, rgba(125, 255, 195, 0.14), transparent 45%),
+        linear-gradient(180deg, rgba(30, 90, 110, 0.45), rgba(10, 22, 40, 0.4));
+    }
+    .hero[data-tone="warm"] {
+      background:
+        linear-gradient(145deg, rgba(255, 200, 87, 0.16), transparent 45%),
+        linear-gradient(180deg, rgba(120, 80, 40, 0.4), rgba(10, 22, 40, 0.4));
+    }
+    .hero[data-tone="hot"] {
+      background:
+        linear-gradient(145deg, rgba(255, 120, 90, 0.2), transparent 45%),
+        linear-gradient(180deg, rgba(140, 50, 40, 0.45), rgba(10, 22, 40, 0.4));
+    }
+    .hero[data-day="0"] {
+      filter: saturate(0.85) brightness(0.92);
+    }
+
+    .place {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: rgba(234, 242, 255, 0.92);
+    }
+    .condition {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .temp-row {
+      margin-top: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .temp {
+      font-family: var(--mono);
+      font-size: clamp(4.2rem, 18vw, 5.6rem);
+      font-weight: 500;
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+      animation: tempIn 0.45s ease;
+    }
+    .unit {
+      margin-top: 10px;
+      font-size: 1.35rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    @keyframes tempIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .meta {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .meta div {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+    .meta dt {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .meta dd {
+      margin-top: 4px;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+    }
+    .time {
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .search {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+      padding: 13px 14px;
+      outline: none;
+    }
+    input:focus { border-color: rgba(62, 198, 255, 0.55); }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 13px 16px;
+      background: var(--accent);
+      color: #041018;
+    }
+    button:disabled { opacity: 0.45; cursor: default; }
+    button.secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      font-size: 0.8rem;
+      padding: 8px 10px;
+      font-weight: 500;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      background: rgba(255,255,255,0.06);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    .chip.active {
+      border-color: rgba(62, 198, 255, 0.7);
+      color: var(--accent);
+      background: rgba(62, 198, 255, 0.12);
+    }
+
+    #status {
+      min-height: 1.2em;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    #status[data-kind="ok"] { color: var(--accent-2); }
+    #status[data-kind="warn"] { color: var(--warn); }
+    #status[data-kind="err"] { color: var(--err); }
+    #status[data-kind="busy"] { color: var(--accent); }
+
+    .hint {
+      margin-top: auto;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* Watch / narrow FOV */
+    @media (max-width: 280px), (max-height: 300px) {
+      .app { padding: 6px; gap: 6px; }
+      .brand h1 { font-size: 1.1rem; }
+      .brand .tag, .hint, .meta, .time, #wearable-enable { display: none; }
+      .hero { min-height: 0; padding: 10px; border-radius: 14px; }
+      .temp { font-size: 2.4rem; }
+      .unit { font-size: 0.9rem; margin-top: 4px; }
+      .place { font-size: 0.8rem; }
+      .condition { font-size: 0.7rem; }
+      .search { gap: 4px; }
+      input, button { padding: 8px; font-size: 0.75rem; border-radius: 10px; }
+      .chips { gap: 4px; max-height: 52px; overflow: hidden; }
+      .chip { padding: 4px 8px; font-size: 0.65rem; }
+      #status { font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="brand">
+      <h1>城温</h1>
+      <span class="tag">真实气温</span>
+    </header>
+
+    <section class="hero" id="hero-card" data-tone="neutral" data-day="1" aria-live="polite">
+      <div class="place" id="place">—</div>
+      <div class="condition" id="condition">查询中</div>
+      <div class="temp-row">
+        <span class="temp" id="temp">--</span>
+        <span class="unit" id="unit">°C</span>
+      </div>
+      <dl class="meta">
+        <div>
+          <dt>体感</dt>
+          <dd id="feels">--</dd>
+        </div>
+        <div>
+          <dt>湿度</dt>
+          <dd id="humidity">--</dd>
+        </div>
+        <div>
+          <dt>风速</dt>
+          <dd id="wind">--</dd>
+        </div>
+      </dl>
+      <p class="time" id="time"></p>
+    </section>
+
+    <div class="search">
+      <input id="city" type="text" inputmode="search" autocomplete="off" placeholder="输入城市名" aria-label="城市名" />
+      <button type="button" id="query">查询</button>
+      <button type="button" id="locate" class="secondary" title="定位">定位</button>
+    </div>
+
+    <div class="chips" id="chips" aria-label="常用城市"></div>
+    <p id="status"></p>
+
+    <button type="button" class="ghost" id="wearable-enable">启用戒指 / 手杖</button>
+    <p class="hint">
+      数据来自 Open-Meteo 实况。戒指上下倾切换城市，摇一摇刷新；手杖轻点刷新，摆动切换城市。
+    </p>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/wearable-input.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+node_modules/
+www/js/
+dist/
+android/.gradle/
+android/app/build/
+ios/App/Pods/
+.DS_Store
+*.apk
+*.ipa
+
+# Build, cache & secret exclusions
+.env
+.env.*
+!.env.example
+.npm-cache/
+.build/
+DerivedData/
+.gradle/
+android/build/
+__pycache__/
+.venv/
+*.aab
